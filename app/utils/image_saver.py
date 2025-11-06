@@ -9,8 +9,11 @@ def save_image(image):
     
     filename = secure_filename(image.filename)
     timestamp = datetime.datetime.now().strftime("%Y%m%d%H%M%S")
-    img_path = os.path.join(upload_folder, timestamp, filename)
-    
+    folder_path = os.path.join(upload_folder, timestamp)
+
+    os.makedirs(folder_path, exist_ok=True)
+
+    img_path = os.path.join(folder_path, filename)
     image.save(img_path)
 
     return img_path
