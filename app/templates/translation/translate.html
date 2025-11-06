@@ -75,7 +75,10 @@
               </div>
             </div>
             <div class="flex flex-col items-center justify-center gap-8 mt-6 p-4 flex-1">
-              <div class="flex flex-col items-center gap-6 w-full max-w-lg">
+              <form id="upload-form" action="{{ url_for('tu_ruta_en_flask') }}" method="POST"
+                enctype="multipart/form-data" class="flex flex-col items-center gap-6 w-full max-w-lg">
+
+                <!-- Dropzone -->
                 <div id="image-dropzone"
                   class="flex flex-col items-center justify-center w-full min-h-[200px] rounded-xl border-2 border-dashed border-gray-300 dark:border-gray-600 bg-white dark:bg-background-dark p-6 text-center"
                   ondrop="handleDrop(event)" ondragover="handleDragOver(event)">
@@ -83,20 +86,27 @@
                   <h3 class="text-lg font-semibold text-[#0d121b] dark:text-white">
                     Arrastra y suelta una imagen aquí
                   </h3>
-                  <p class="text-sm text-[#4c669a] dark:text-gray-400 mt-1">
-                    o
-                  </p>
-                  <button id="upload-button"
+                  <p class="text-sm text-[#4c669a] dark:text-gray-400 mt-1">o</p>
+
+                  <!-- Botón real de subida -->
+                  <label for="image-input"
                     class="flex min-w-[84px] cursor-pointer items-center justify-center gap-2 overflow-hidden rounded-lg h-12 px-5 bg-primary text-white text-base font-bold leading-normal tracking-[0.015em] hover:bg-primary/90 transition-colors mt-4">
-                    <span class="material-symbols-outlined" data-icon="upload_file">upload_file</span>
+                    <span class="material-symbols-outlined">upload_file</span>
                     <span class="truncate">Adjuntar Imagen</span>
-                  </button>
+                  </label>
+
+                  <!-- Input de archivo -->
+                  <input id="image-input" type="file" name="image" accept="image/*" class="hidden"
+                    onchange="handleFileSelect(event)">
+
                   <p class="text-xs text-center text-[#4c669a] dark:text-gray-500 mt-4">
                     Formatos aceptados: JPG, PNG.
                   </p>
+
                   <img id="image-preview" src="" alt="Imagen cargada" class="hidden mt-4 max-w-full rounded-lg" />
                 </div>
-              </div>
+              </form>
+
               <div
                 class="w-full max-w-lg flex flex-col gap-4 rounded-xl bg-white dark:bg-background-dark border border-gray-200 dark:border-gray-700 p-6">
                 <div class="flex justify-between items-center">
@@ -105,32 +115,34 @@
                   </h2>
                 </div>
                 {% if viewData['count'] == 0 %}
-                  <div
-                    class="flex flex-1 items-center justify-center rounded-lg bg-background-light dark:bg-gray-800 min-h-48 p-4">
-                    <p class="text-[#4c669a] dark:text-gray-500 text-center">
-                      Los caracteres Hiragana detectados aparecerán aquí.
-                    </p>
-                  </div>
+                <div
+                  class="flex flex-1 items-center justify-center rounded-lg bg-background-light dark:bg-gray-800 min-h-48 p-4">
+                  <p class="text-[#4c669a] dark:text-gray-500 text-center">
+                    Los caracteres Hiragana detectados aparecerán aquí.
+                  </p>
+                </div>
                 {% else %}
-                  {% for hiragana, romanized, image in viewData['predicted_char'] | zip(viewData['romanized_char'], viewData['images']) %}
-                    <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                      <div class="flex flex-col gap-1 rounded-lg bg-background-light dark:bg-background-dark p-4">
-                        <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
-                          Entrada</p>
-                        <img src="{{ image }}" alt="Hiragana ingresado" class="text-4xl font-bold text-text-light dark:text-text-dark">
-                      </div>
-                      <div class="flex flex-col gap-1 rounded-lg bg-background-light dark:bg-background-dark p-4">
-                        <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
-                          Hiragana</p>
-                        <p class="text-4xl font-bold text-text-light dark:text-text-dark">{{ hiragana }}</p>
-                      </div>
-                      <div class="flex flex-col gap-1 rounded-lg bg-background-light dark:bg-background-dark p-4">
-                        <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
-                          Romaji</p>
-                        <p class="text-4xl font-bold text-text-light dark:text-text-dark">{{ romanized }}</p>
-                      </div>
-                    </div>
-                  {% endfor %}
+                {% for hiragana, romanized, image in viewData['predicted_char'] | zip(viewData['romanized_char'],
+                viewData['images']) %}
+                <div class="grid grid-cols-1 gap-4 sm:grid-cols-3">
+                  <div class="flex flex-col gap-1 rounded-lg bg-background-light dark:bg-background-dark p-4">
+                    <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
+                      Entrada</p>
+                    <img src="{{ image }}" alt="Hiragana ingresado"
+                      class="text-4xl font-bold text-text-light dark:text-text-dark">
+                  </div>
+                  <div class="flex flex-col gap-1 rounded-lg bg-background-light dark:bg-background-dark p-4">
+                    <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
+                      Hiragana</p>
+                    <p class="text-4xl font-bold text-text-light dark:text-text-dark">{{ hiragana }}</p>
+                  </div>
+                  <div class="flex flex-col gap-1 rounded-lg bg-background-light dark:bg-background-dark p-4">
+                    <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
+                      Romaji</p>
+                    <p class="text-4xl font-bold text-text-light dark:text-text-dark">{{ romanized }}</p>
+                  </div>
+                </div>
+                {% endfor %}
                 {% endif %}
               </div>
               <div
@@ -140,94 +152,105 @@
                     Traducción al Español
                   </h2>
                 </div>
-                {% if viewData['count'] < 2 %}
-                  <div
-                    class="flex flex-1 items-center justify-center rounded-lg bg-background-light dark:bg-gray-800 min-h-48 p-4">
-                    <p class="text-[#4c669a] dark:text-gray-500 text-center">
-                      La traducción aparecerá aquí.
-                    </p>
-                  </div>
-                {% else %}
-                  <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                    <div class="flex flex-col gap-1 rounded-lg bg-background-light dark:bg-background-dark p-4">
-                      <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
-                        Japonés</p>
-                      <p class="text-4xl font-bold text-text-light dark:text-text-dark">{{ viewData['hiragana_word'] }}</p>
-                    </div>
-                    <div class="flex flex-col gap-1 rounded-lg bg-background-light dark:bg-background-dark p-4">
-                      <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
-                        Español</p>
-                      <p class="text-4xl font-bold text-text-light dark:text-text-dark">{{ viewData['romanized_word'] }}</p>
-                    </div>
-                  </div>
-                {% endif %}
+                {% if viewData['count'] < 2 %} <div
+                  class="flex flex-1 items-center justify-center rounded-lg bg-background-light dark:bg-gray-800 min-h-48 p-4">
+                  <p class="text-[#4c669a] dark:text-gray-500 text-center">
+                    La traducción aparecerá aquí.
+                  </p>
               </div>
+              {% else %}
+              <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div class="flex flex-col gap-1 rounded-lg bg-background-light dark:bg-background-dark p-4">
+                  <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
+                    Japonés</p>
+                  <p class="text-4xl font-bold text-text-light dark:text-text-dark">{{ viewData['hiragana_word'] }}</p>
+                </div>
+                <div class="flex flex-col gap-1 rounded-lg bg-background-light dark:bg-background-dark p-4">
+                  <p class="text-sm font-medium text-text-secondary-light dark:text-text-secondary-dark">
+                    Español</p>
+                  <p class="text-4xl font-bold text-text-light dark:text-text-dark">{{ viewData['romanized_word'] }}</p>
+                </div>
+              </div>
+              {% endif %}
             </div>
-          </main>
         </div>
+        </main>
       </div>
     </div>
+  </div>
   </div>
 </body>
 
 <script>
-  // Maneja el evento cuando se arrastra la imagen sobre la zona
+  // Evita el comportamiento por defecto del navegador al arrastrar
   function handleDragOver(event) {
-    event.preventDefault(); // Previene el comportamiento predeterminado
-    event.stopPropagation(); // Evita que el evento se propague
-    event.dataTransfer.dropEffect = 'copy'; // Muestra el cursor de "copiar"
+    event.preventDefault();
+    event.stopPropagation();
+    event.dataTransfer.dropEffect = "copy";
   }
 
-  // Maneja el evento cuando se deja caer la imagen en la zona
+  // Maneja el drop (soltar archivo)
   function handleDrop(event) {
-    event.preventDefault(); // Previene el comportamiento predeterminado
-    event.stopPropagation(); // Evita que el evento se propague
+    event.preventDefault();
+    event.stopPropagation();
 
-    // Obtener el archivo de la imagen desde el evento
     const files = event.dataTransfer.files;
-
     if (files && files.length > 0) {
-      const imageFile = files[0]; // Solo tomamos el primer archivo
-
-      // Comprobamos que el archivo sea una imagen
+      const imageFile = files[0];
       if (imageFile.type.startsWith("image/")) {
         displayImagePreview(imageFile);
+        submitFormWithFile(imageFile);
       } else {
-        alert("Por favor, sube un archivo de imagen.");
+        alert("Por favor, sube un archivo de imagen válido (JPG o PNG).");
       }
     }
   }
 
-  // Función para mostrar la vista previa de la imagen
+  // Cuando se selecciona un archivo con el input
+  function handleFileSelect(event) {
+    const file = event.target.files[0];
+    if (file && file.type.startsWith("image/")) {
+      displayImagePreview(file);
+      submitFormWithFile(file);
+    }
+  }
+
+  // Muestra una vista previa de la imagen
   function displayImagePreview(file) {
     const reader = new FileReader();
-
-    // Cuando el archivo se lee correctamente
     reader.onload = function (e) {
-      const imgElement = document.getElementById("image-preview");
-      imgElement.src = e.target.result; // Establecer la vista previa de la imagen
-      imgElement.classList.remove("hidden"); // Mostrar la imagen
+      const img = document.getElementById("image-preview");
+      img.src = e.target.result;
+      img.classList.remove("hidden");
     };
-
-    // Leemos el archivo como una URL de datos
     reader.readAsDataURL(file);
   }
 
-  // Maneja la carga de la imagen desde el botón de "subir"
-  document.getElementById("upload-button").addEventListener("click", function () {
-    const input = document.createElement("input");
-    input.type = "file";
-    input.accept = "image/*"; // Acepta solo imágenes
+  // Crea un FormData y lo envía automáticamente
+  function submitFormWithFile(file) {
+    const form = document.getElementById("upload-form");
+    const formData = new FormData(form);
+    formData.set("image", file); // Asegura que el archivo se incluya
 
-    input.addEventListener("change", function () {
-      const file = input.files[0]; // Obtener el archivo seleccionado
-      if (file) {
-        displayImagePreview(file);
-      }
-    });
-
-    input.click(); // Simula un clic para abrir el selector de archivos
-  });
+    // Envía el formulario mediante POST
+    fetch(form.action, {
+      method: "POST",
+      body: formData
+    })
+      .then(response => {
+        if (!response.ok) throw new Error("Error en la subida");
+        return response.text();
+      })
+      .then(html => {
+        // Puedes reemplazar el contenido con la respuesta del servidor
+        document.body.innerHTML = html;
+      })
+      .catch(err => {
+        console.error(err);
+        alert("Error al subir la imagen.");
+      });
+  }
 </script>
+
 
 </html>
