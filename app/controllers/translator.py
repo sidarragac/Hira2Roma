@@ -1,3 +1,5 @@
+import os
+
 from utils.image_predictor import ImagePredictor
 from utils.image_processor import ImageProcessor
 from utils.transliterator import Transliterator
@@ -8,26 +10,49 @@ from utils.image_saver import save_image
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
 
-def translate_char():
-    return render_template('translation/translate_char.html')
+def translate_text():
+    viewData = {}
+    viewData['count'] = 0
+    return render_template('translation/translate.html', viewData=viewData)
 
-def process_char(image):
+def process_text(image):
     if not allowed_file(image.filename):
         return {'error': 'Tipo de archivo no permitido'}, 400
 
     img_path = save_image(image)
+    folder_path = os.path.dirname(img_path)
 
+    processor = ImageProcessor(img_path, 500)
     predictor = ImagePredictor()
     transliterator = Transliterator()
 
-    predicted_char = predictor.predict_image(img_path)
-    char, romanized_char = transliterator.transliterate(predicted_char)
+    count = processor.get_grid()
+    image_files = [f"{folder_path}/{f}" for f in os.listdir(folder_path)]
 
-    viewdata = {}
-    viewdata['predicted_char'] = char
-    viewdata['romanized_char'] = romanized_char
+    viewData = {}
+    viewData['count'] = count
+    viewData['image_files'] = image_files
 
-    return render_template('translation/processed_char.html', viewdata=viewdata)
+    if count == 1:
+        predicted_char = predictor.predict_image(img_path)
+        char, romanized_char = transliterator.transliterate(predicted_char)
 
-def translate_text():
-    return render_template('translation/translate_text.html')
+        viewData['predicted_char'] = char
+        viewData['romanized_char'] = romanized_char
+        viewData['hiragana_word'] = ''
+        viewData['romanized_word'] = ''
+        return render_template('translation/translate.html', viewData=viewData)
+
+    predicted_char =  predictor.predict_images_in_folder(folder_path)
+    res = transliterator.transliterate_text(predicted_char)
+    predicted_arr = []
+    romanized_arr = []
+    for char, romanized_char in res:
+        predicted_arr.append(char)
+        romanized_arr.append(romanized_char)
+    viewData['predicted_char'] = predicted_arr
+    viewData['romanized_char'] = romanized_arr
+    viewData['hiragana_word'] = ''.join(predicted_arr)
+    viewData['romanized_word'] = ''.join(romanized_arr) 
+
+    return render_template('translation/processed_char.html', viewData=viewData)
