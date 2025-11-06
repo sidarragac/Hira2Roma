@@ -1,3 +1,5 @@
+import cv2
+
 from flask import current_app, render_template
 from utils.image_predictor import ImagePredictor
 from utils.image_processor import ImageProcessor
@@ -13,10 +15,12 @@ def process_char(image):
     if not allowed_file(image.filename):
         return {'error': 'Tipo de archivo no permitido'}, 400
 
+    img_path = '/uploads/' + image.filename
+    cv2.imwrite(img_path, image.read())
     predictor = ImagePredictor()
     transliterator = Transliterator()
 
-    predicted_char = predictor.predict_image(image)
+    predicted_char = predictor.predict_image(img_path)
     romanized_char = transliterator.transliterate(predicted_char)
 
     viewdata = {}
