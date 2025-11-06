@@ -13,4 +13,4 @@ class Config:
     # Upload Configuration
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB max file size
     ALLOWED_EXTENSIONS = {'png', 'jpg'}
-    UPLOAD_FOLDER = os.path.join(os.getcwd(), 'uploads')
+    UPLOAD_FOLDER = os.environ.get('UPLOAD_FOLDER') or os.path.join(os.getcwd(), 'uploads')
