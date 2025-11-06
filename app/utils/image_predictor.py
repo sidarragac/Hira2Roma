@@ -49,7 +49,6 @@ class ImagePredictor:
         pred_label = self.le.inverse_transform(pred)[0]
         
         print("Predicción:", pred_label)
-        os.remove(image_path)
 
         return str(pred_label)
 
