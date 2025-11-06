@@ -14,12 +14,11 @@ translate_bp = Blueprint('translate', __name__)
 def index():
     return home()
 
-@translate_bp.route('/', methods=['GET'])
-def translate():
-    return translate_text()
-
-@translate_bp.route('/result', methods=['POST'])
+@translate_bp.route('/', methods=['GET', 'POST'])
 def translate_result():
+    if request.method == 'GET':
+        return translate_text()
+    
     if 'image' not in request.files:
         return {'error': 'No image provided'}, 400
     image = request.files['image']
