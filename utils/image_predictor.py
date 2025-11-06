@@ -51,7 +51,7 @@ class ImagePredictor:
         print("Predicción:", pred_label)
         os.remove(image_path)
 
-        return pred_label
+        return str(pred_label)
 
     def predict_images_in_folder(self, folder_path):
         image_files = os.listdir(folder_path)
