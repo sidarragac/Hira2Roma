@@ -29,3 +29,4 @@ class ImageProcessor:
                 count += 1
 
         os.remove(self.image_path)
+        return count
