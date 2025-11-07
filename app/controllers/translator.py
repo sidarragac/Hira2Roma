@@ -1,11 +1,13 @@
 import os
 
+from flask import current_app, render_template
+
+from services.google_api_client import GoogleAPIClient
 from utils.image_predictor import ImagePredictor
 from utils.image_processor import ImageProcessor
 from utils.transliterator import Transliterator
-
-from flask import current_app, render_template
 from utils.image_saver import save_image
+
 
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in current_app.config['ALLOWED_EXTENSIONS']
@@ -25,9 +27,9 @@ def process_text(image):
     processor = ImageProcessor(img_path, 500)
     predictor = ImagePredictor()
     transliterator = Transliterator()
+    google_client = GoogleAPIClient()
 
     count = processor.get_grid(folder_path)
-
 
     viewData = {}
     viewData['count'] = count
@@ -55,7 +57,10 @@ def process_text(image):
     image_files = [f"{folder_path}/{f}" for f in os.listdir(folder_path)]
     viewData['zip'] = list(zip(predicted_arr, romanized_arr, image_files))
 
-    viewData['hiragana_word'] = ''.join(predicted_arr)
-    viewData['romanized_word'] = ''.join(romanized_arr)
+    predicted_text = ''.join(predicted_arr)
+    translated_text = google_client.translate_text(predicted_text)
+
+    viewData['hiragana_word'] = predicted_text
+    viewData['romanized_word'] = translated_text
 
     return render_template('translation/translate.html', viewData=viewData)
