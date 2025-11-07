@@ -6,10 +6,11 @@ load_dotenv()
 class Config:
     SECRET_KEY = os.environ.get('SECRET_KEY') or 'dev'
     
-    # Google API Configuration
-    GOOGLE_API_KEY = os.environ.get('GOOGLE_API_KEY')
-    GOOGLE_APPLICATION_CREDENTIALS = os.environ.get('GOOGLE_APPLICATION_CREDENTIALS')
+    KEYS_FOLDER = os.environ.get('KEYS_FOLDER') or os.path.join(os.getcwd(), 'keys')
     
+    # Google API Configuration
+    GCP_KEY_FILE_NAME = os.environ.get('GCP_FILE_NAME') or 'gcp_key.json'
+
     # Upload Configuration
     MAX_CONTENT_LENGTH = 16 * 1024 * 1024  # 16 MB max file size
     ALLOWED_EXTENSIONS = {'png', 'jpg'}
